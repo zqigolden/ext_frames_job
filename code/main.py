@@ -32,7 +32,7 @@ def main(args):
     run_system_command(cmd, cwd=output_path)
     run_system_command('for i in `find * -name \'*.jpg\'`; do mv $i ${i//\//_}; done && find . -type d -delete',
                        cwd=output_path + '/images')
-    run_system_command('tar -cf {0.output_name} {output_path}'.format(args, output_path=output_path))
+    run_system_command('ls {output_path}/images/ | xargs tar -cf {0.output_name} -C {output_path}/images/'.format(args, output_path=output_path))
     hdfs_client.put(args.output_name, args.output_folder)
 
 
