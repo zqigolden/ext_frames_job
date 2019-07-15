@@ -1,0 +1,30 @@
+FROM centos:centos7
+
+RUN yum -y install wget vim
+RUN yum -y install python-pip
+RUN pip install snakebite
+RUN mkdir /opt/package
+WORKDIR /opt/package
+
+# install hadoop
+RUN wget https://mirrors.tuna.tsinghua.edu.cn/apache/hadoop/common/hadoop-2.6.5/hadoop-2.6.5.tar.gz
+RUN tar -zxvf hadoop-2.6.5.tar.gz
+ADD ./hadoop_configs /opt/package/hadoop-2.6.5/etc/hadoop/
+#ADD ./hadoop_configs/hdfs-site.xml /opt/package/hadoop-2.6.5/etc/hadoop
+#ADD ./hadoop_configs/core-site.xml /opt/package/hadoop-2.6.5/etc/hadoop
+#ADD ./hadoop_configs/hadoop-env.sh /opt/package/hadoop-2.6.5/etc/hadoop
+#ADD ./hadoop_configs/log4j.properties /opt/package/hadoop-2.6.5/etc/hadoop
+
+# install Java JDK
+RUN rpm -ivh http://mirrors.aibee.cn/tools/java/jdk-8u181-linux-x64.rpm
+
+# config env
+ENV JAVA_HOME=/usr/java/default
+ENV CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+ENV HADOOP_HOME=/opt/package/hadoop-2.6.5
+ENV HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+ENV HADOOP_OPTS="$HADOOP_OPTS -Djava.library.path=$HADOOP_HOME/lib"
+ENV PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin
+
+RUN mkdir /opt/code
+WORKDIR /opt/code
