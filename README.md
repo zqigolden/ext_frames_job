@@ -1,5 +1,8 @@
 # Frames extraction task
-QiZhu 20190715
+
+- Auther: QiZhu 
+- Date: 20190715
+
 Extract feames from the videos saved in hdfs cluster, and save iamge results in selected folder.
 ## Usage example
 ```bash
