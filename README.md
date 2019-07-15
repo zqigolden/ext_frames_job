@@ -26,10 +26,13 @@ bash -c "IDC=bj python main.py \
 ## Job test results
 
 - test cmd: 
+
     ```bash
     curl 'http://taskmanage.aibee.cn/api/v1/task/prod-cpu/submit_task/' -d 'name=extframes-CTF-beijing-hsh-20190709&extra_task_name=test1&priority=97&owner=qzhu&dry_run=1'
     ```
+    
 - test result files:
+
     ```text
     /prod/train/data/raw/bot/CTF/beijing-hsh/ch01008_20190709.tar
     /prod/train/data/raw/pano/CTF/beijing-hsh/ch01008_20190709.tar
