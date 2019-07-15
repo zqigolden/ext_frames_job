@@ -1,5 +1,6 @@
 # Frames extraction task
-
+QiZhu 20190715
+Extract feames from the videos saved in hdfs cluster, and save iamge results in selected folder.
 ## Usage example
 ```bash
 docker run --rm -it -v /opt/package/hadoop-2.6.5/etc/:/opt/package/hadoop-2.6.5/etc/ \
