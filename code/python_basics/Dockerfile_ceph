@@ -1,0 +1,12 @@
+FROM ubuntu:16.04
+
+RUN apt-get update
+RUN apt-get install -y python-rados
+
+RUN mkdir -p /root/code
+ADD ceph_utils.py /root/code
+
+RUN mkdir -p /root/code/ceph_configs
+ADD ceph_configs /root/code/ceph_configs/
+
+WORKDIR /root/code
