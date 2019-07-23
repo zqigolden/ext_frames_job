@@ -4,7 +4,7 @@ import time
 import config
 from snakebite.namenode import Namenode
 
-from .decorators import retry
+from decorators import retry
 
 PYTHON_MAJOR_VERSION_2 = (sys.version_info[:1] == (2,))
 
