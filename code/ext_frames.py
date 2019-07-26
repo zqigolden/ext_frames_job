@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 import cv2
 
-print(cv2.__version__)
 import os
 import argparse
 import copy
@@ -11,6 +10,8 @@ import zipfile
 def ext_video(input_video, output_path, step=None, start=None, faster=False, keep_dir=False, frame_need=None,
               enable_zip=False, hdfs=False):
     print('Start:', input_video)
+    if frame_need == 0:
+        return
     if hdfs:
         os.system('hdfs dfs -get %s' % input_video)
         input_video = os.path.basename(input_video)
@@ -39,8 +40,6 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
         if step > 1:
             step *= 2
 
-    print(start, step)
-
     if not keep_dir:
         video_name = os.path.split(input_video)[-1]
     else:
@@ -56,22 +55,18 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
         for _ in range(i):
             vc.retrieve()
 
-    count = 0
     while True:
         succ = vc.grab()
         if not succ or (frame_count > 0 and i >= frame_count):
-            print('stop at %d' % i)
             break
         if (i - start) % step == 0:
             _, frame = vc.retrieve()
-            print('count:', count)
             out_name = os.path.join(output_path, video_name, '{:06d}.jpg'.format(i))
             if opts.enable_zip:
                 frame_str = cv2.imencode('.jpg', frame)[1].tostring()
                 zip_out.writestr(out_name, frame_str)
             else:
                 cv2.imwrite(out_name, frame)
-            count += 1
         if frame_need is not None and count >= frame_need:
             break
         if faster:
@@ -106,7 +101,7 @@ if __name__ == '__main__':
     parser.add_argument('-k', '--keep_dir', action='store_true')
     parser.add_argument('-l', '--list', help='input file list')
     parser.add_argument('-z', '--enable_zip', action='store_true', help='write_to_zip_file')
-    parser.add_argument('-p', '--processes', type=int, help='multi_processes', default=1)
+    parser.add_argument('-p', '--processes', type=int, help='multi_processes', default=15)
     parser.add_argument('--hdfs', action='store_true', help='using hdfs client')
     opts = parser.parse_args()
     print(opts)
