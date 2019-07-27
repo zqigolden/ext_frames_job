@@ -32,12 +32,12 @@ ext(){
     LABEL_TYPE=$4
     NAME="${DEPLOY_DATE}_${CUSTOMER}-${LOCATE}-${STORE}_${START_DATE}-${END_DATE}_${START_HOUR}-${END_HOUR}-${TYPE}"
     VDO_DIR="/prod/customer/${CUSTOMER_LOCATE_STORE}/videos/processed/${DATA_TYPE}"
-    mkdir -p /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
+    mkdir -m 777 -p /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
     cd /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
     echo cd /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
 
     #make video list
-    if [[ -n -e list ]]; then
+    if [[ ! -e list ]]; then
         for d in `seq ${START_DATE} ${END_DATE}`; do
             hdfs dfs -ls ${VDO_DIR}/${d} | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print "/mnt/bj-hdfs2"$NF}' >> list
         done
@@ -56,12 +56,14 @@ ext(){
         return
     fi
 
-    python /code/ext_frames.py -f --frame_need ${FRAME_NEED} -o images -l list_filted -p 15 &>> log
-    if [[ $? -ne 0 ]]; then
-        echo ext_frames error
-        exit 1
+    if [[ -e list_filted ]]; then
+        python /code/ext_frames.py -f --frame_need ${FRAME_NEED} -o images -l list_filted -p 15 &>> log
+        if [[ $? -ne 0 ]]; then
+            echo ext_frames error
+            exit 1
+        fi
+        python /code/deploy.py `pwd` -l ${LABEL_TYPE} --store ${CUSTOMER_LOCATE_STORE} --camera ${TYPE} &>> log &
     fi
-    python /code/deploy.py `pwd` -l ${LABEL_TYPE} --store ${CUSTOMER_LOCATE_STORE} --camera ${TYPE} &>> log &
 }
 
 if [[ $REGULAR ]]; then

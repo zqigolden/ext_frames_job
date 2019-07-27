@@ -54,7 +54,7 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
     else:
         for _ in range(i):
             vc.retrieve()
-
+    count = 0
     while True:
         succ = vc.grab()
         if not succ or (frame_count > 0 and i >= frame_count):
@@ -67,6 +67,7 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
                 zip_out.writestr(out_name, frame_str)
             else:
                 cv2.imwrite(out_name, frame)
+            count += 1
         if frame_need is not None and count >= frame_need:
             break
         if faster:

@@ -26,6 +26,7 @@ args['path'] = os.path.abspath(opt.input)
 args['name'] = os.path.basename(args['path'])
 args['subname'] = args['name'].split('_')[1]
 args['camera'] = opt.camera
+args['store'] = opt.store
 
 os.chdir(os.path.join(args['path'], 'images'))
 os.system('for i in `find * -name \'*.jpg\'`; do mv $i ${i//\//_}; done && find . -type d -delete')
