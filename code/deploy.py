@@ -42,7 +42,7 @@ os.system('tar -cf {name}.tar {name}'.format(**args))
 os.system('ssh -p {port} {user}@{ip} mkdir -p /Detection/{subname}'.format(**args))
 os.system('scp -P {port} {name}.tar {user}@{ip}:/Detection/{subname}'.format(**args))
 os.system('ssh -p {port} {user}@{ip} tar -xf /Detection/{subname}/{name}.tar -C /Detection/{subname}'.format(**args))
-os.system('echo Zq110320 | ssh -p {port} {user}@{ip} sudo -S python3 /Detection/scripts/deploy_detection.py -p /Detection/{subname}/{name}'.format(**args))
+os.system('echo Zq110320 | ssh -p {port} {user}@{ip} sudo -S python3 /Detection/scripts/deploy_detection.py --task_seg 50 -p /Detection/{subname}/{name}'.format(**args))
 
 # bot no mask
 if args['camera'] == 'bot':

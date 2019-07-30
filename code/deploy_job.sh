@@ -30,7 +30,7 @@ ext(){
     DATA_TYPE=$2
     VIDEO_SUFFIX=$3
     LABEL_TYPE=$4
-    NAME="${DEPLOY_DATE}_${CUSTOMER}-${LOCATE}-${STORE}_${START_DATE}-${END_DATE}_${START_HOUR}-${END_HOUR}-${TYPE}"
+    NAME="${DEPLOY_DATE}_${CUSTOMER}-${LOCATE}-${STORE}_${START_DATE}-${END_DATE}_${START_HOUR}-${END_HOUR}_${TYPE}"
     VDO_DIR="/prod/customer/${CUSTOMER_LOCATE_STORE}/videos/processed/${DATA_TYPE}"
     mkdir -m 777 -p /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
     cd /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
