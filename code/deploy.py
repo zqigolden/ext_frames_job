@@ -38,19 +38,19 @@ os.system('python /code/remove_black.py images')
 
 os.chdir(os.path.split(args['path'])[0])
 os.system('tar -cf {name}.tar {name}'.format(**args))
-#os.system('tar -cf {name}.tar {name}'.format(**args))
-os.system('ssh -p {port} {user}@{ip} mkdir -p /Detection/{subname}'.format(**args))
-os.system('scp -P {port} {name}.tar {user}@{ip}:/Detection/{subname}'.format(**args))
-os.system('ssh -p {port} {user}@{ip} tar -xf /Detection/{subname}/{name}.tar -C /Detection/{subname}'.format(**args))
-os.system('echo Zq110320 | ssh -p {port} {user}@{ip} sudo -S python3 /Detection/scripts/deploy_detection.py --task_seg 50 -p /Detection/{subname}/{name}'.format(**args))
-
-# bot no mask
-if args['camera'] == 'bot':
-    exit(0)
-if args['camera'] == 'pano':
-    args['camera'] = 'fisheye'
-args['store'] = args['store'].replace('-', '/')
-
-os.system('echo Zq110320 | ssh -p {port} {user}@{ip} sudo -S ln -s /mnt/ceph1/repository/CameraInfos/{store}/{camera}/ /Detection/{subname}/{name}/mask'.format(**args))
-
+##os.system('tar -cf {name}.tar {name}'.format(**args))
+#os.system('ssh -p {port} {user}@{ip} mkdir -p /Detection/{subname}'.format(**args))
+#os.system('scp -P {port} {name}.tar {user}@{ip}:/Detection/{subname}'.format(**args))
+#os.system('ssh -p {port} {user}@{ip} tar -xf /Detection/{subname}/{name}.tar -C /Detection/{subname}'.format(**args))
+#os.system('echo Zq110320 | ssh -p {port} {user}@{ip} sudo -S python3 /Detection/scripts/deploy_detection.py --task_seg 50 -p /Detection/{subname}/{name}'.format(**args))
+#
+## bot no mask
+#if args['camera'] == 'bot':
+#    exit(0)
+#if args['camera'] == 'pano':
+#    args['camera'] = 'fisheye'
+#args['store'] = args['store'].replace('-', '/')
+#
+#os.system('echo Zq110320 | ssh -p {port} {user}@{ip} sudo -S ln -s /mnt/ceph1/repository/CameraInfos/{store}/{camera}/ /Detection/{subname}/{name}/mask'.format(**args))
+#
 

@@ -7,6 +7,7 @@ source $(dirname $0)/argparse.bash || exit 1
 argparse "$@" <<EOF || exit 1
 parser.add_argument('customer_locate_store', help='CTF/beijing/wcc')
 parser.add_argument('date', help='20190101-20190131')
+parser.add_argument('--base_dir', default='/ssd/zq/frames', help='default: /mnt/soulfs2/zq/ext_frames')
 parser.add_argument('--hour', default='00-23', help='00-23')
 parser.add_argument('--frame_need', default='1', help='1')
 parser.add_argument('--list_only', action='store_true', help='only get video list')
@@ -32,14 +33,14 @@ ext(){
     LABEL_TYPE=$4
     NAME="${DEPLOY_DATE}_${CUSTOMER}-${LOCATE}-${STORE}_${START_DATE}-${END_DATE}_${START_HOUR}-${END_HOUR}_${TYPE}"
     VDO_DIR="/prod/customer/${CUSTOMER_LOCATE_STORE}/videos/processed/${DATA_TYPE}"
-    mkdir -m 777 -p /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
-    cd /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
-    echo cd /mnt/soulfs2/zq/ext_frames/${CUSTOMER_LOCATE_STORE}/${NAME}
+    mkdir -m 777 -p ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
+    cd ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
+    echo cd ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
 
     #make video list
     if [[ ! -e list ]]; then
         for d in `seq ${START_DATE} ${END_DATE}`; do
-            hdfs dfs -ls ${VDO_DIR}/${d} | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print "/mnt/bj-hdfs2"$NF}' >> list
+            hdfs dfs -ls ${VDO_DIR}/${d} | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print $NF}' >> list
         done
         python /code/filter_hours.py list list_filted ${START_HOUR} ${END_HOUR}
         if [[ $? -ne 0 ]]; then
@@ -57,7 +58,7 @@ ext(){
     fi
 
     if [[ -e list_filted ]]; then
-        python /code/ext_frames.py -f --frame_need ${FRAME_NEED} -o images -l list_filted -p 15 &>> log
+        python /code/ext_frames.py -f --frame_need ${FRAME_NEED} -o images -l list_filted --hdfs -p 15 &>> log
         if [[ $? -ne 0 ]]; then
             echo ext_frames error
             exit 1
@@ -70,7 +71,7 @@ if [[ $REGULAR ]]; then
     ext regular body '' body,head
 fi
 if [[ $BOT ]]; then
-    ext bot fisheye bot head
+    ext ot fisheye bot head
 fi
 if [[ $PANO ]]; then
     ext pano fisheye pano body,head
