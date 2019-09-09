@@ -36,8 +36,8 @@ with open(os.path.join(args['path'], 'label'), 'w') as f:
 os.chdir(args['path'])
 os.system('python /code/remove_black.py images')
 
-os.chdir(os.path.split(args['path'])[0])
-os.system('tar -cf {name}.tar {name}'.format(**args))
+#os.system('scp -r iamges first_party@172.16.244.74:/home/first_party/Detection/{}')
+#os.system('tar -cf {name}.tar {name}'.format(**args))
 ##os.system('tar -cf {name}.tar {name}'.format(**args))
 #os.system('ssh -p {port} {user}@{ip} mkdir -p /Detection/{subname}'.format(**args))
 #os.system('scp -P {port} {name}.tar {user}@{ip}:/Detection/{subname}'.format(**args))
