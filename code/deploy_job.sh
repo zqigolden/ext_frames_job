@@ -12,6 +12,7 @@ parser.add_argument('--hour', default='00-23', help='00-23')
 parser.add_argument('--frame_need', default='1', help='1')
 parser.add_argument('--list_only', action='store_true', help='only get video list')
 parser.add_argument('--regular', action='store_true')
+parser.add_argument('--did', action='store_true')
 parser.add_argument('--bot', action='store_true')
 parser.add_argument('--pano', action='store_true')
 parser.add_argument('--parkinglot', action='store_true')
@@ -70,8 +71,11 @@ ext(){
 if [[ $REGULAR ]]; then
     ext regular body '' body,head
 fi
+if [[ $DID ]]; then
+    ext did face '' body,head
+fi
 if [[ $BOT ]]; then
-    ext ot fisheye bot head
+    ext bot fisheye bot head
 fi
 if [[ $PANO ]]; then
     ext pano fisheye pano body,head
