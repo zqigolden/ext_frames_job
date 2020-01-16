@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-IMAGE=registry.aibee.cn/aibee/ext_frame:0.2.4-dev
+IMAGE=registry.aibee.cn/aibee/ext_frame:0.3.0
 docker build -t $IMAGE . 
-#docker push $IMAGE
+docker push $IMAGE

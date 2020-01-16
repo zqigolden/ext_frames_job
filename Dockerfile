@@ -1,6 +1,5 @@
 FROM registry.aibee.cn/platform/hdfs-operate:0.0.2
-RUN pip install opencv-python==4.1.0.25
-RUN pip install pyyaml snakebite
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple numpy==1.16 opencv-python==4.1.0.25 pyyaml snakebite
 RUN yum install -y libSM libXrender libXext openssh-clients
 COPY code/ /code/
 COPY ssh /root/.ssh/
