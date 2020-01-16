@@ -31,7 +31,6 @@ ext(){
     TYPE=$1
     DATA_TYPE=$2
     VIDEO_SUFFIX=$3
-    LABEL_TYPE=$4
     NAME="Detection_${CUSTOMER}_${LOCATE}_${STORE}_${DEPLOY_DATE}_${START_DATE}-${END_DATE}_${START_HOUR}-${END_HOUR}_${TYPE}"
     VDO_DIR="/prod/customer/${CUSTOMER_LOCATE_STORE}/videos/processed/${DATA_TYPE}"
     mkdir -m 777 -p ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
@@ -40,8 +39,9 @@ ext(){
 
     #make video list
     if [[ ! -e list ]]; then
-        for d in `seq ${START_DATE} ${END_DATE}`; do
-            hdfs dfs -ls ${VDO_DIR}/${d} | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print $NF}' >> list
+        while [ ${START_DATE} -le ${END_DATE} ]; do
+            hdfs dfs -ls ${VDO_DIR}/${START_DATE} | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print $NF}' >> list
+            START_DATE=`date -d ${START_DATE}+1day +%Y%m%d`
         done
         python /code/filter_hours.py list list_filted ${START_HOUR} ${END_HOUR}
         if [[ $? -ne 0 ]]; then
@@ -59,29 +59,33 @@ ext(){
     fi
 
     if [[ -e list_filted ]]; then
-        python /code/ext_frames.py -f --frame_need ${FRAME_NEED} -o images -l list_filted --hdfs -p 15 &>> log
+        python /code/ext_frames.py -f --frame_need ${FRAME_NEED} -o images/${CUSTOMER_LOCATE_STORE} -l list_filted --hdfs -p 15 &>> log
         if [[ $? -ne 0 ]]; then
             echo ext_frames error
             exit 1
         fi
-        python /code/deploy.py `pwd` -l ${LABEL_TYPE} --store ${CUSTOMER_LOCATE_STORE} --camera ${TYPE} &>> log &
+        cd images \
+            && for i in `find * -name '*.jpg'`; do mv $i ${i//\//_}; done \
+            && find . -type d -delete \
+            && cd .. \
+            && python /code/remove_black.py images &
     fi
 }
 
 if [[ $REGULAR ]]; then
-    ext regular body '' body,head
+    ext regular body ''
 fi
 if [[ $DID ]]; then
-    ext did face '' body,head
+    ext did face ''
 fi
 if [[ $BOT ]]; then
-    ext bot fisheye bot head
+    ext bot fisheye bot 
 fi
 if [[ $PANO ]]; then
-    ext pano fisheye pano body,head
+    ext pano fisheye pano
 fi
 if [[ $PARKINGLOT ]]; then
-    ext parkinglot parkinglot '' car
+    ext parkinglot parkinglot
 fi
 
 wait
