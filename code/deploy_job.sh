@@ -61,12 +61,19 @@ ext(){
     fi
 
     if [[ -e list_filted ]]; then
+        echo python /code/ext_frames.py \
+            -f --frame_need ${FRAME_NEED} \
+            -o images/${CUSTOMER_LOCATE_STORE} \
+            -l list_filted \
+            --start_per $START \
+            --end_per $END \
+            --hdfs -p 15
         python /code/ext_frames.py \
             -f --frame_need ${FRAME_NEED} \
             -o images/${CUSTOMER_LOCATE_STORE} \
             -l list_filted \
             --start_per $START \
-            --end_per $end \
+            --end_per $END \
             --hdfs -p 15 &>> log
         if [[ $? -ne 0 ]]; then
             echo ext_frames error
