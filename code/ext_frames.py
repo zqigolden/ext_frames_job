@@ -8,7 +8,7 @@ import zipfile
 
 
 def ext_video(input_video, output_path, step=None, start=None, faster=False, keep_dir=False, frame_need=None,
-              enable_zip=False, hdfs=False):
+              enable_zip=False, hdfs=False, start_per=0.3, end_per=0.7):
     print('Start:', input_video)
     if frame_need == 0:
         return
@@ -24,8 +24,8 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
         if frame_count < 0:
             print('Error, frame_count can not read')
             exit(-1)
-        start = int(frame_count * 0.3)
-        end = int(frame_count * 0.7)
+        start = int(frame_count * start_per)
+        end = int(frame_count * end_per)
         step = max(int((end - start) / frame_need), 1)
 
     if start is None:
@@ -84,6 +84,8 @@ def main(args):
               output_path=args.output_path,
               step=args.step,
               start=args.start,
+              start_per=args.start_per,
+              end_per=args.end_per,
               faster=args.faster,
               keep_dir=args.keep_dir,
               frame_need=args.frame_need,
@@ -97,6 +99,8 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output_path', default=os.getcwd())
     parser.add_argument('-s', '--step', type=int)
     parser.add_argument('--start', type=int)
+    parser.add_argument('--start_per', type=float)
+    parser.add_argument('--end_per', type=float)
     parser.add_argument('--frame_need', type=int)
     parser.add_argument('-f', '--faster', action='store_true', help='for converted video')
     parser.add_argument('-k', '--keep_dir', action='store_true')

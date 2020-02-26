@@ -10,6 +10,8 @@ parser.add_argument('date', help='20190101-20190131')
 parser.add_argument('--base_dir', default='/ssd/zq/frames', help='default: /mnt/soulfs2/zq/ext_frames')
 parser.add_argument('--hour', default='00-23', help='00-23')
 parser.add_argument('--frame_need', default='1', help='1')
+parser.add_argument('--start', default='0.3')
+parser.add_argument('--end', default='0.7')
 parser.add_argument('--list_only', action='store_true', help='only get video list')
 parser.add_argument('--regular', action='store_true')
 parser.add_argument('--did', action='store_true')
@@ -59,7 +61,13 @@ ext(){
     fi
 
     if [[ -e list_filted ]]; then
-        python /code/ext_frames.py -f --frame_need ${FRAME_NEED} -o images/${CUSTOMER_LOCATE_STORE} -l list_filted --hdfs -p 15 &>> log
+        python /code/ext_frames.py \
+            -f --frame_need ${FRAME_NEED} \
+            -o images/${CUSTOMER_LOCATE_STORE} \
+            -l list_filted \
+            --start_per $START \
+            --end_per $end \
+            --hdfs -p 15 &>> log
         if [[ $? -ne 0 ]]; then
             echo ext_frames error
             exit 1
