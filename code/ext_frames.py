@@ -122,7 +122,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print(args)
 
-    if on_hdfs(args.list) or on_hdfs(args.video_dir):
+    if args.user or on_hdfs(args.video_dir):
         args.hdfs = True
         hdfscli.initKerberos(args.keytab, args.user)
 
