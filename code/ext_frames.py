@@ -17,9 +17,16 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
     if frame_need == 0:
         return
     if hdfs:
-        hdfscli.initKerberos(args.keytab, args.user)
+        try:
+            hdfscli.initKerberos(args.keytab, args.user)
+        except Exception:
+            pass
         client = hdfscli.HdfsClient(user=args.user)
-        client.download(input_video, '.')
+        try:
+            client.download(input_video, '.')
+        except Exception:
+            print(input_video, 'download failed')
+            return
         input_video = os.path.basename(input_video)
 
         if not os.path.exists(input_video):
