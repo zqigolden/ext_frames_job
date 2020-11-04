@@ -59,11 +59,12 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
 
     # goto first frame
     i = start
-    if faster:
-        vc.set(cv2.CAP_PROP_POS_FRAMES, i)
-    else:
-        for _ in range(i):
-            vc.retrieve()
+    if start > 0:
+        if faster:
+            vc.set(cv2.CAP_PROP_POS_FRAMES, i - 1)
+        else:
+            for _ in range(i):
+                vc.grab()
     count = 0
     while True:
         succ = vc.grab()
@@ -71,18 +72,19 @@ def ext_video(input_video, output_path, step=None, start=None, faster=False, kee
             break
         if (i - start) % step == 0:
             _, frame = vc.retrieve()
-            out_name = os.path.join(output_path, video_name, '{:06d}.jpg'.format(i))
+            #should be i + 1 if video start at 1
+            out_name = os.path.join(output_path, video_name, '{:06d}.jpg'.format(i)) 
             if args.zip:
                 frame_str = cv2.imencode('.jpg', frame)[1].tostring()
                 zip_out.writestr(out_name, frame_str)
             else:
                 cv2.imwrite(out_name, frame)
             count += 1
-        if frame_need is not None and count >= frame_need:
+        if frame_need and count >= frame_need:
             break
         if faster:
             i += step
-            vc.set(cv2.CAP_PROP_POS_FRAMES, i)
+            vc.set(cv2.CAP_PROP_POS_FRAMES, i - 1)
         else:
             i += 1
     if hdfs:

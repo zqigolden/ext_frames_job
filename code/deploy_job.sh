@@ -12,8 +12,11 @@ parser.add_argument('--hour', default='00-23', help='00-23')
 parser.add_argument('--frame_need', default='1', help='1')
 parser.add_argument('--start', default='0.3')
 parser.add_argument('--end', default='0.7')
+parser.add_argument('-l', '--list', help='input video list')
 parser.add_argument('--list_only', action='store_true', help='only get video list')
+parser.add_argument('-s', '--date_suffix', default='', help='date suffix: like _bmk for 20200920_bmk')
 parser.add_argument('--regular', action='store_true')
+parser.add_argument('--fid', action='store_true')
 parser.add_argument('--did', action='store_true')
 parser.add_argument('--bot', action='store_true')
 parser.add_argument('--pano', action='store_true')
@@ -40,14 +43,16 @@ ext(){
     NAME="Detection_${CUSTOMER}_${LOCATE}_${STORE}_${DEPLOY_DATE}_${START_DATE}-${END_DATE}_${START_HOUR}-${END_HOUR}_${TYPE}"
     VDO_DIR="/${HDFS}/prod/customer/${CUSTOMER_LOCATE_STORE}/videos/processed/${DATA_TYPE}"
     mkdir -m 777 -p ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
+    test -e ${LIST} && cp ${LIST} ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}/list_filted
+    echo "init exist video list: ${LIST}"
     cd ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
-    echo cd ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
+    echo "cd ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}"
 
     #make video list
-    if [[ ! -e list ]]; then
+    if [[ ! -e list_filted ]]; then
         while [ ${START_DATE} -le ${END_DATE} ]; do
             hdfscli initkrb5 -k ${KEYTAB} ${USER}
-            hdfscli list ${VDO_DIR}/${START_DATE}/* | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print '\"/${HDFS}\"'$NF}' >> list
+            hdfscli list ${VDO_DIR}/${START_DATE}${DATE_SUFFIX}/* | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print '\"/${HDFS}\"'$NF}' >> list
             START_DATE=$(date -d ${START_DATE}+1day +%Y%m%d)
         done
         python /code/filter_hours.py list list_filted ${START_HOUR} ${END_HOUR}
@@ -56,7 +61,7 @@ ext(){
             exit 1
         fi
     else
-        echo find list exists, skipping create list
+        echo find video list exists, skipping create video list
     fi
 
     echo list done
@@ -66,17 +71,7 @@ ext(){
     fi
 
     if [[ -e list_filted ]]; then
-        echo python3 /code/ext_frames.py \
-            -f --frame_need ${FRAME_NEED} \
-            -o images/${CUSTOMER_LOCATE_STORE} \
-            -l list_filted \
-            --start_per $START \
-            --end_per $END \
-            --hdfs -p 15 \
-            --user ${USER} \
-            --keytab ${KEYTAB}
-
-#        python3 /code/ext_frames.py \
+        echo ectracting images to ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}/images
         python3 /code/ext_frames.py \
             -f --frame_need ${FRAME_NEED} \
             -o images/${CUSTOMER_LOCATE_STORE} \
@@ -102,6 +97,9 @@ ext(){
 
 if [[ $REGULAR ]]; then
     ext regular body ''
+fi
+if [[ $FID ]]; then
+    ext fid body ''
 fi
 if [[ $DID ]]; then
     ext did face ''
