@@ -6,6 +6,7 @@ import argparse
 import copy
 import glob
 import zipfile
+import re
 from aibee_hdfs import hdfscli
 
 
@@ -13,7 +14,12 @@ from aibee_hdfs import hdfscli
 
 def ext_video(input_video, output_path, step=None, start=None, faster=False, keep_dir=False, frame_need=None,
               zip=False, hdfs=False, start_per=0.3, end_per=0.7):
-    print('Start:', input_video)
+    prefix = ''
+    prefix_search = re.search('customer/((?:[^/]*/){3})', input_video)
+    if args.prefix and prefix_search:
+        prefix = prefix_search.group(1)
+        output_path = os.path.join(output_path, prefix)
+    print('Start: {} -> {}'.format(input_video, output_path))
     if frame_need == 0:
         return
     if hdfs:
@@ -129,6 +135,7 @@ if __name__ == '__main__':
     parser.add_argument('--hdfs', action='store_true', help='using hdfs client')
     parser.add_argument('-u', '--user', help='using with --keytab')
     parser.add_argument('-k', '--keytab', help='keytab file path')
+    parser.add_argument('--prefix', help='the prefix of image name', action='store_true')
     args = parser.parse_args()
     print(args)
 

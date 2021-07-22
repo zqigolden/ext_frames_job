@@ -21,14 +21,15 @@ parser.add_argument('--did', action='store_true')
 parser.add_argument('--bot', action='store_true')
 parser.add_argument('--pano', action='store_true')
 parser.add_argument('--parkinglot', action='store_true')
+parser.add_argument('--with_prefix', action='store_true')
 parser.add_argument('--hdfs', help='bj gz bj-dev sh', default='bj')
 parser.add_argument('-u', '--user', help='using with --keytab', required=True)
 parser.add_argument('-k', '--keytab', help='keytab file path', required=True)
 EOF
 
-DEPLOY_DATE=`date +%Y%m%d`
+DEPLOY_DATE=$(date +%Y%m%d)
 CUSTOMER=${CUSTOMER_LOCATE_STORE%%/*}
-LOCATE=`echo ${CUSTOMER_LOCATE_STORE} | sed 's#.*/\(.*\)/.*#\1#g'`
+LOCATE=$(echo ${CUSTOMER_LOCATE_STORE} | sed 's#.*/\(.*\)/.*#\1#g')
 STORE=${CUSTOMER_LOCATE_STORE##*/}
 START_DATE=${DATE%-*}
 END_DATE=${DATE#*-}
@@ -42,18 +43,20 @@ ext(){
     VIDEO_SUFFIX=$3
     NAME="Detection_${CUSTOMER}_${LOCATE}_${STORE}_${DEPLOY_DATE}_${START_DATE}-${END_DATE}_${START_HOUR}-${END_HOUR}_${TYPE}"
     VDO_DIR="/${HDFS}/prod/customer/${CUSTOMER_LOCATE_STORE}/videos/processed/${DATA_TYPE}"
-    mkdir -m 777 -p ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
-    test -e ${LIST} && cp ${LIST} ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}/list_filted
+    TARGET_DIR="${BASE_DIR}"/"${CUSTOMER_LOCATE_STORE}"/"${NAME}"
+    mkdir -p "$TARGET_DIR"
+    chmod -R a+w "$TARGET_DIR"
+    test -e "$LIST" && cp "$LIST" "$TARGET_DIR"/list_filted
     echo "init exist video list: ${LIST}"
-    cd ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}
-    echo "cd ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}"
+    cd "$TARGET_DIR" || exit 255
+    echo "cd $TARGET_DIR"
 
     #make video list
     if [[ ! -e list_filted ]]; then
-        while [ ${START_DATE} -le ${END_DATE} ]; do
-            hdfscli initkrb5 -k ${KEYTAB} ${USER}
-            hdfscli list ${VDO_DIR}/${START_DATE}${DATE_SUFFIX}/* | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print '\"/${HDFS}\"'$NF}' >> list
-            START_DATE=$(date -d ${START_DATE}+1day +%Y%m%d)
+        while [ "${START_DATE}" -le "${END_DATE}" ]; do
+            hdfscli initkrb5 -k "${KEYTAB}" "${USER}"
+            hdfscli list "${VDO_DIR}/${START_DATE}${DATE_SUFFIX}/*" | awk "/.*${VIDEO_SUFFIX}.*"'mp4\s*$/{print '\"/"${HDFS}"\"'$NF}' >> list
+            START_DATE=$(date -d "${START_DATE}"+1day +%Y%m%d)
         done
         python /code/filter_hours.py list list_filted ${START_HOUR} ${END_HOUR}
         if [[ $? -ne 0 ]]; then
@@ -64,23 +67,29 @@ ext(){
         echo find video list exists, skipping create video list
     fi
 
-    echo list done
+    echo "generate list done"
 
     if [[ $LIST_ONLY ]]; then
         return
     fi
 
+    PREFIX=''
+    if [[ $WITH_PREFIX ]]; then
+        PREFIX="--prefix"
+    fi
+
     if [[ -e list_filted ]]; then
-        echo ectracting images to ${BASE_DIR}/${CUSTOMER_LOCATE_STORE}/${NAME}/images
+        echo ectracting images to "$TARGET_DIR"/images
         python3 /code/ext_frames.py \
-            -f --frame_need ${FRAME_NEED} \
-            -o images/${CUSTOMER_LOCATE_STORE} \
+            -f --frame_need "${FRAME_NEED}" \
+            -o images/"${CUSTOMER_LOCATE_STORE}" \
             -l list_filted \
-            --start_per $START \
-            --end_per $END \
+            --start_per "$START" \
+            --end_per "$END" \
             --hdfs -p 15 \
-            --user ${USER} \
-            --keytab ${KEYTAB} \
+            --user "$USER" \
+            --keytab "$KEYTAB" \
+            "$PREFIX" \
             &> log
         if [[ $? -ne 0 ]]; then
             echo ext_frames error:
@@ -88,7 +97,7 @@ ext(){
             exit 1
         fi
         cd images \
-            && for i in `find * -name '*.jpg'`; do mv $i ${i//\//_}; done \
+            && for i in $(find * -name '*.jpg'); do mv $i ${i//\//_}; done \
             && find . -type d -delete \
             && cd .. \
             && python3 /code/remove_black.py images &
